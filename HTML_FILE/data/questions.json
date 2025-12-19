@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "category": "Web Dev",
+    "difficulty": "easy",
+    "question": "What does HTML stand for?",
+    "options": [
+      "Hyper Text Markup Language",
+      "High Text Machine Language",
+      "Hyperlinks Text Mark Language",
+      "None"
+    ],
+    "answer": 0,
+    "explanation": "HTML stands for Hyper Text Markup Language."
+  },
+  {
+    "id": 2,
+    "category": "Web Dev",
+    "difficulty": "medium",
+    "question": "Which keyword creates a constant in JavaScript?",
+    "options": ["var", "let", "const", "static"],
+    "answer": 2,
+    "explanation": "`const` creates a block-scoped constant."
+  },
+  {
+    "id": 3,
+    "category": "English",
+    "difficulty": "easy",
+    "question": "Choose the synonym of 'Rapid'.",
+    "options": ["Slow", "Quick", "Weak", "Late"],
+    "answer": 1,
+    "explanation": "Rapid means quick."
+  }
+]

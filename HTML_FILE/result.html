@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Result</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="card">
+    <h2>Quiz Completed 🎉</h2>
+    <p id="score"></p>
+
+    <button class="btn btn-primary" onclick="location.href='index.html'">
+      Go Home
+    </button>
+  </div>
+</div>
+
+<script>
+  const result = JSON.parse(localStorage.getItem("quizResult"));
+  document.getElementById("score").textContent =
+    `Score: ${result.score} / ${result.activeQuestions.length}`;
+</script>
+
+</body>
+</html>

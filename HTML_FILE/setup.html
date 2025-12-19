@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz Setup</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="card">
+
+    <h2 class="title">Create Your Challenge</h2>
+
+    <div class="progress-track">
+      <div class="progress-fill"></div>
+    </div>
+
+    <!-- Categories -->
+    <div class="grid">
+      <div class="category" onclick="selectCategory(this,'English')">English 📘</div>
+      <div class="category" onclick="selectCategory(this,'Quant')">Quant 📐</div>
+      <div class="category" onclick="selectCategory(this,'GK')">GK 🌍</div>
+      <div class="category" onclick="selectCategory(this,'Web Dev')">Web Dev 💻</div>
+    </div>
+
+    <!-- Difficulty -->
+    <div class="pills">
+      <div class="pill easy" onclick="selectDifficulty(this,'easy')">Easy</div>
+      <div class="pill medium" onclick="selectDifficulty(this,'medium')">Medium</div>
+      <div class="pill hard" onclick="selectDifficulty(this,'hard')">Hard</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveAndContinue()">
+      Continue →
+    </button>
+
+  </div>
+</div>
+
+<script src="js/ui.js"></script>
+</body>
+</html>

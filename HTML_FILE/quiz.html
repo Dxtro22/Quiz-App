@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="card">
+
+    <!-- Progress -->
+    <div class="progress-track">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <!-- Question -->
+    <h2 id="question">Loading...</h2>
+
+    <!-- Options -->
+    <div id="options"></div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { loadQuestions } from "./js/dataLoader.js";
+  import { buildQuiz } from "./js/questionEngine.js";
+  import { initQuiz } from "./js/quizController.js";
+
+  const configRaw = localStorage.getItem("quizConfig");
+
+  if (!configRaw) {
+    alert("Quiz config missing");
+    location.href = "setup.html";
+  }
+
+  const config = JSON.parse(configRaw);
+
+  await loadQuestions();
+  buildQuiz({ ...config, count: 5 });
+
+  initQuiz();
+</script>
+
+</body>
+</html>
