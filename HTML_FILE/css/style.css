@@ -50,6 +50,7 @@ html, body {
 }
 
 body {
+  /* Restoring the original professional font */
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: radial-gradient(circle at top center, #1e293b 0%, #020617 80%);
   background-attachment: fixed;
@@ -61,12 +62,12 @@ body {
 }
 
 /* =========================
-   APP CONTAINER (UPDATED FOR SIZE)
+   APP CONTAINER
 ========================= */
 
 .app {
   width: 100%;
-  max-width: 1100px; /* Much wider for desktop */
+  max-width: 1100px;
   padding: 24px;
   margin: auto;
 }
@@ -82,13 +83,13 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   
   border-radius: var(--radius-lg);
-  padding: 64px; /* More breathing room */
-  min-height: 70vh; /* Takes up vertical space */
+  padding: 64px;
+  min-height: 70vh;
   
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center content vertically */
-  align-items: center;     /* Center content horizontally */
+  justify-content: center;
+  align-items: center;
   
   box-shadow: var(--shadow-lg), var(--shadow-glow);
   animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -99,7 +100,7 @@ body {
 ========================= */
 
 .title {
-  font-size: 4rem; /* Huge title */
+  font-size: 4rem;
   font-weight: 800;
   letter-spacing: -2px;
   margin-bottom: 24px;
@@ -151,12 +152,12 @@ body {
 }
 
 /* =========================
-   CATEGORY GRID (Responsive)
+   CATEGORY GRID
 ========================= */
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 columns on large screens */
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   width: 100%;
   margin-bottom: 40px;
@@ -218,13 +219,12 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* Dynamic colors for active pills */
 .pill.active.easy { color: var(--easy); }
 .pill.active.medium { color: var(--medium); }
 .pill.active.hard { color: var(--hard); }
 
 /* =========================
-   QUIZ ELEMENTS (Question & Options)
+   QUIZ ELEMENTS
 ========================= */
 
 #question {
@@ -237,7 +237,7 @@ body {
 
 #options {
   width: 100%;
-  max-width: 800px; /* Limit width of buttons for readability */
+  max-width: 800px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -273,7 +273,7 @@ body {
 
   .card {
     padding: 32px 20px;
-    min-height: auto; /* Let it shrink on mobile */
+    min-height: auto;
   }
 
   .title {
@@ -284,7 +284,6 @@ body {
     font-size: 1.1rem;
   }
 
-  /* Stack categories on mobile */
   .grid {
     grid-template-columns: repeat(2, 1fr); 
   }
@@ -302,5 +301,81 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* =========================
+   SPLIT SCREEN (LOGIN PAGE)
+   (Restored for the previous design)
+========================= */
+
+.split-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  gap: 32px;
+  padding: 20px;
+}
+
+.split-visuals {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.phone-mockup {
+  width: 100%;
+  max-width: 380px;
+  height: 580px;
+  /* Abstract Brain / Tech Image */
+  background-image: url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop'); 
+  background-size: cover;
+  background-position: center;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5);
+  border: 8px solid #1e293b;
+  position: relative;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.split-form {
+  flex: 1;
+  max-width: 380px;
+}
+
+.login-card {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 12px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.signup-box {
+  margin-top: 15px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 850px) {
+  .split-visuals {
+    display: none;
+  }
+  .split-screen {
+    max-width: 450px;
   }
 }
