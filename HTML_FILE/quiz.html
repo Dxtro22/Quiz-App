@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Quiz</title>
   <link rel="stylesheet" href="css/style.css">
@@ -9,15 +9,15 @@
 <div class="app">
   <div class="card">
 
-    <!-- Progress -->
     <div class="progress-track">
       <div class="progress-fill" id="progress"></div>
     </div>
 
-    <!-- Question -->
-    <h2 id="question">Loading...</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+       <h2 id="question" style="margin:0;">Loading Question...</h2>
+       <div id="timer" style="font-weight:bold; color:var(--accent); font-size:1.2rem;"></div>
+    </div>
 
-    <!-- Options -->
     <div id="options"></div>
 
   </div>
@@ -28,19 +28,52 @@
   import { buildQuiz } from "./js/questionEngine.js";
   import { initQuiz } from "./js/quizController.js";
 
-  const configRaw = localStorage.getItem("quizConfig");
+  // Error Handler: Shows errors on screen if something crashes
+  window.onerror = function(msg, source, line) {
+    document.body.innerHTML = `
+      <div style="color:red; background:#111; padding:20px; text-align:center;">
+        <h2>⚠️ Error</h2>
+        <p>${msg}</p>
+        <p>File: ${source} : ${line}</p>
+        <button class="btn" onclick="location.href='setup.html'">Go Back</button>
+      </div>`;
+  };
 
-  if (!configRaw) {
-    alert("Quiz config missing");
-    location.href = "setup.html";
+  async function startApp() {
+    try {
+      // 1. Get Settings
+      const configRaw = localStorage.getItem("quizConfig");
+      if (!configRaw) {
+        alert("No settings found. Redirecting...");
+        window.location.href = "setup.html";
+        return;
+      }
+      const config = JSON.parse(configRaw);
+
+      // 2. Fetch Data (API Connection)
+      document.getElementById("question").textContent = "Connecting to Database...";
+      await loadQuestions(config);
+
+      // 3. Prepare Game
+      buildQuiz(config);
+
+      // 4. Start
+      initQuiz();
+
+    } catch (err) {
+      console.error(err);
+      // Show friendly error message
+      document.querySelector(".card").innerHTML = `
+        <h2 style="color:var(--hard)">Unable to Start</h2>
+        <p>${err.message}</p>
+        <br>
+        <button class="btn btn-primary" onclick="location.href='setup.html'">Try Again</button>
+      `;
+    }
   }
 
-  const config = JSON.parse(configRaw);
-
-  await loadQuestions();
-  buildQuiz({ ...config, count: 5 });
-
-  initQuiz();
+  // Run the app
+  startApp();
 </script>
 
 </body>

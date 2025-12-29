@@ -4,40 +4,26 @@ export function buildQuiz(config) {
   QuizState.config = config;
   QuizState.startTime = Date.now();
 
-  const filtered = filterQuestions(
-    QuizState.allQuestions,
-    config.category,
-    config.difficulty
-  );
+  // Since we asked the API for specific questions, 
+  // we assume ALL loaded questions are valid.
+  // No need to filter by name anymore.
+  const questions = QuizState.allQuestions;
 
-  if (filtered.length < config.count) {
-    console.error("CONFIG:", config);
-    console.error("AVAILABLE QUESTIONS:", QuizState.allQuestions);
-    throw new Error("Not enough questions for this selection");
+  if (!questions || questions.length === 0) {
+    alert("No questions loaded.");
+    window.location.href = "setup.html";
+    return;
   }
 
-  const shuffled = shuffleArray(filtered);
-  QuizState.activeQuestions = shuffled.slice(0, config.count);
-}
-
-function normalize(value) {
-  return value.toString().toLowerCase().trim();
-}
-
-function filterQuestions(questions, category, difficulty) {
-  return questions.filter(q =>
-    normalize(q.category) === normalize(category) &&
-    normalize(q.difficulty) === normalize(difficulty)
-  );
+  // Just shuffle them and start
+  QuizState.activeQuestions = shuffleArray(questions);
 }
 
 function shuffleArray(arr) {
   const copy = [...arr];
-
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-
   return copy;
 }

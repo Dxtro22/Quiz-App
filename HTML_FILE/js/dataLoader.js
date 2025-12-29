@@ -1,36 +1,47 @@
 import { QuizState } from "./state.js";
 
-export async function loadQuestions() {
-  try {
-    const res = await fetch("HTML_FILE/data/questions.json");
+const CATEGORY_IDS = {
+  "Web Dev": 18,
+  "GK": 9,
+  "Quant": 19,
+  "English": 10
+};
 
-    if (!res.ok) {
-      throw new Error("Failed to load questions");
-    }
+export async function loadQuestions(config) {
+  // Default to ID 18 (Computers) if category not found
+  const catId = CATEGORY_IDS[config.category] || 18;
+  const amount = 10;
+  const difficulty = config.difficulty.toLowerCase();
 
-    const data = await res.json();
+  const url = `https://opentdb.com/api.php?amount=${amount}&category=${catId}&difficulty=${difficulty}&type=multiple`;
 
-    validateQuestions(data);
-    QuizState.allQuestions = data;
+  console.log("Fetching URL:", url);
 
-  } catch (err) {
-    console.error("DATA LOAD ERROR:", err);
-    alert("Unable to load quiz data. Please try again.");
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (data.response_code !== 0) {
+    throw new Error(`API Error Code: ${data.response_code}. Try a different difficulty.`);
   }
+
+  QuizState.allQuestions = data.results.map((q, index) => {
+    const allOptions = [...q.incorrect_answers, q.correct_answer];
+    const shuffledOptions = allOptions.sort(() => Math.random() - 0.5);
+
+    return {
+      id: index,
+      category: config.category,
+      difficulty: config.difficulty,
+      question: decodeHTML(q.question),
+      options: shuffledOptions.map(decodeHTML),
+      answer: shuffledOptions.indexOf(q.correct_answer),
+      explanation: `Correct: ${q.correct_answer}`
+    };
+  });
 }
 
-function validateQuestions(data) {
-  if (!Array.isArray(data)) {
-    throw new Error("Invalid question dataset");
-  }
-
-  data.forEach(q => {
-    if (
-      typeof q.question !== "string" ||
-      !Array.isArray(q.options) ||
-      typeof q.answer !== "number"
-    ) {
-      throw new Error("Corrupted question format");
-    }
-  });
+function decodeHTML(html) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
 }
