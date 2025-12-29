@@ -10,7 +10,13 @@
 <body>
 
   <div class="app">
-    <div class="card">
+    <div class="card" style="position: relative;">
+      
+      <button onclick="localStorage.removeItem('quizUser'); location.href='login.html'" 
+              style="position: absolute; top: 30px; right: 30px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: color 0.3s;">
+        Logout ↪
+      </button>
+
       <h1 class="title">Challenge Your Mind</h1>
       <p class="subtitle">
         A modern quiz experience built for deep learning & focus.

@@ -1,3 +1,19 @@
+// Check Auth on Load
+const currentUser = JSON.parse(localStorage.getItem("quizUser"));
+
+if (!currentUser) {
+  // If no user found, force them to login
+  window.location.href = "login.html"; 
+} else {
+  // Optional: Update UI with name
+  console.log(`Logged in as: ${currentUser.name}`);
+}
+
+function logout() {
+  localStorage.removeItem("quizUser");
+  window.location.href = "login.html";
+}
+
 const state = {
   category: null,
   difficulty: null
