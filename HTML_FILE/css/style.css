@@ -152,20 +152,28 @@ body {
 }
 
 /* =========================
-   CATEGORY GRID
+   CATEGORY GRID (Updated for Centered Bottom Row)
 ========================= */
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;             /* Switch to Flexbox */
+  flex-wrap: wrap;           /* Allow items to wrap to next line */
+  justify-content: center;   /* Center the items in the last row */
   gap: 20px;
   width: 100%;
   margin-bottom: 40px;
 }
 
 .category {
+  /* CALCULATION:
+     We want 4 items per row. 
+     (100% width) / 4 = 25%.
+     Minus the gap space (approx 15px).
+  */
+  width: calc(25% - 15px);
+  
   background: rgba(255, 255, 255, 0.03);
-  padding: 32px 20px;
+  padding: 32px 10px;
   border-radius: var(--radius-md);
   text-align: center;
   cursor: pointer;
@@ -173,6 +181,11 @@ body {
   transition: var(--smooth);
   font-weight: 600;
   font-size: 1.1rem;
+  
+  /* Centers text perfectly inside the box */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .category:hover {
@@ -185,6 +198,18 @@ body {
   border-color: var(--accent);
   background: rgba(59, 130, 246, 0.1);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+/* =========================
+   MOBILE RESPONSIVENESS
+   (Make sure to include this media query update!)
+========================= */
+
+@media (max-width: 768px) {
+  .category {
+    /* On mobile, make items wider to fit 2 per row */
+    width: calc(50% - 10px); 
+  }
 }
 
 /* =========================
