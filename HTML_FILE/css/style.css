@@ -306,7 +306,6 @@ body {
 
 /* =========================
    SPLIT SCREEN (LOGIN PAGE)
-   (Restored for the previous design)
 ========================= */
 
 .split-screen {
@@ -384,7 +383,6 @@ body {
    PROFILE MENU STYLES
 ========================= */
 
-/* Wrapper for positioning */
 .profile-container {
   position: absolute;
   top: 30px;
@@ -392,7 +390,6 @@ body {
   z-index: 100;
 }
 
-/* 1. The Icon (Circle Person) */
 .profile-icon {
   width: 45px;
   height: 45px;
@@ -418,10 +415,9 @@ body {
   border-color: var(--accent);
 }
 
-/* 2. The Dropdown Menu */
 .profile-dropdown {
   position: absolute;
-  top: 60px; /* Below the icon */
+  top: 60px;
   right: 0;
   width: 200px;
   background: rgba(15, 23, 42, 0.95);
@@ -438,14 +434,12 @@ body {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Class to show the menu */
 .profile-dropdown.active {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
-/* Menu Content */
 .dropdown-header {
   display: flex;
   flex-direction: column;
@@ -472,7 +466,7 @@ hr {
 
 .logout-btn {
   width: 100%;
-  background: rgba(239, 68, 68, 0.1); /* Red tint */
+  background: rgba(239, 68, 68, 0.1);
   color: #EF4444;
   border: none;
   padding: 10px;
@@ -488,4 +482,78 @@ hr {
 .logout-btn:hover {
   background: #EF4444;
   color: white;
+}
+
+/* =========================
+   ADVANCED TEXT SHIMMER
+========================= */
+
+/* The Continuous Light Beam Animation */
+@keyframes lightBeam {
+  0% {
+    background-position: -100% 50%; /* Start far left */
+  }
+  100% {
+    background-position: 200% 50%; /* End far right */
+  }
+}
+
+/* =========================
+   ADVANCED TEXT SHIMMER
+========================= */
+
+/* =========================
+   ADVANCED TEXT SHIMMER (CORRECTED DIRECTION)
+========================= */
+
+/* FIX: Reversed the positions.
+   Start at 200% and go to -200% to force Left-to-Right movement.
+*/
+@keyframes lightBeam {
+  0% {
+    background-position: 200% center; /* Starts off-screen Right */
+  }
+  100% {
+    background-position: -200% center; /* Ends off-screen Left */
+  }
+}
+
+.shimmer-text {
+  /* 1. Define the Light Beam Gradient */
+  /* Grey -> White -> Grey */
+  background: linear-gradient(
+    120deg, 
+    #94a3b8 40%, 
+    #ffffff 50%, 
+    #94a3b8 60%
+  );
+  
+  /* 2. Size: Make background huge so the beam has space to move */
+  background-size: 200% auto;
+
+  /* 3. Clip the background to the letters */
+  -webkit-background-clip: text;
+  background-clip: text;
+  
+  /* 4. Make text transparent so background shows through */
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+
+  /* 5. The Infinite Loop Animation */
+  animation: lightBeam 8s linear infinite;
+
+  /* 6. Smooth Float Transition */
+  display: inline-block; 
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+/* HOVER EFFECT: Float Up + Glow */
+.shimmer-text:hover {
+  transform: translateY(-8px) scale(1.02); /* Float Up */
+  
+  /* Glow effect */
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
+  
+  /* Speed up slightly on hover */
+  animation-duration: 3s; 
 }
