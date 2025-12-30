@@ -485,75 +485,80 @@ hr {
 }
 
 /* =========================
-   ADVANCED TEXT SHIMMER
+   ADVANCED TEXT SHIMMER (FIXED & SMOOTH)
 ========================= */
 
-/* The Continuous Light Beam Animation */
+/* Direction: Left to Right */
 @keyframes lightBeam {
   0% {
-    background-position: -100% 50%; /* Start far left */
+    background-position: 200% center; 
   }
   100% {
-    background-position: 200% 50%; /* End far right */
+    background-position: -200% center; 
   }
 }
 
-/* =========================
-   ADVANCED TEXT SHIMMER
-========================= */
-
-/* =========================
-   ADVANCED TEXT SHIMMER (CORRECTED DIRECTION)
-========================= */
-
-/* FIX: Reversed the positions.
-   Start at 200% and go to -200% to force Left-to-Right movement.
-*/
-@keyframes lightBeam {
-  0% {
-    background-position: 200% center; /* Starts off-screen Right */
-  }
-  100% {
-    background-position: -200% center; /* Ends off-screen Left */
-  }
-}
-
+/* 1. The Container (Layout Only) */
 .shimmer-text {
-  /* 1. Define the Light Beam Gradient */
-  /* Grey -> White -> Grey */
+  cursor: default;
+  /* Ensure parent doesn't hide children */
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: inherit;
+}
+
+/* 2. The Individual Words (Gradient + Animation + Float) */
+.shimmer-text span {
+  display: inline-block;
+  
+  /* Apply the Gradient directly to the word to fix visibility issues */
   background: linear-gradient(
     120deg, 
     #94a3b8 40%, 
     #ffffff 50%, 
     #94a3b8 60%
   );
-  
-  /* 2. Size: Make background huge so the beam has space to move */
   background-size: 200% auto;
-
-  /* 3. Clip the background to the letters */
   -webkit-background-clip: text;
   background-clip: text;
   
-  /* 4. Make text transparent so background shows through */
+  /* Transparent text so background shows through */
   -webkit-text-fill-color: transparent;
   color: transparent;
 
-  /* 5. The Infinite Loop Animation */
+  /* Animation: 8s loop (Slow & Relaxing) */
   animation: lightBeam 8s linear infinite;
 
-  /* 6. Smooth Float Transition */
-  display: inline-block; 
-  transition: transform 0.4s ease, filter 0.4s ease;
+  /* FLOAT SMOOTHNESS:
+     0.7s duration with a "Soft Landing" curve.
+     This makes it feel heavy and premium, not jerky.
+  */
+  transition: transform 0.7s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              filter 0.7s ease,
+              background 0.3s ease;
+              
+  will-change: transform;
+  cursor: pointer;
 }
 
-/* HOVER EFFECT: Float Up + Glow */
-.shimmer-text:hover {
-  transform: translateY(-8px) scale(1.02); /* Float Up */
+/* 3. Restore the "Wave" Flow 
+   This makes the light hit "Create", then "Your", then "Challenge" 
+   instead of all flashing at once.
+*/
+.shimmer-text span:nth-child(1) { animation-delay: 0s; }
+.shimmer-text span:nth-child(2) { animation-delay: 0.5s; }
+.shimmer-text span:nth-child(3) { animation-delay: 1s; }
+
+/* 4. HOVER EFFECT (Solid & Glowing) */
+.shimmer-text span:hover {
+  /* Ultra Smooth Float Up */
+  transform: translateY(-12px) scale(1.05);
   
-  /* Glow effect */
-  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
+  /* Switch to Solid White so it pops */
+  background: none;
+  -webkit-text-fill-color: #ffffff;
+  color: #ffffff;
   
-  /* Speed up slightly on hover */
-  animation-duration: 3s; 
+  /* Soft Glow */
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
 }
