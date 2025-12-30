@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Quiz Setup</title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="app">
+  
+  <a href="index.html" 
+     style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--text-secondary); text-decoration: none; font-weight: 600; cursor: pointer; transition: color 0.3s;">
+    
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    Back to Home
+  </a>
+
   <div class="card">
 
     <h2 class="title">Create Your Challenge</h2>
@@ -15,7 +28,6 @@
       <div class="progress-fill"></div>
     </div>
 
-    <!-- Categories -->
     <div class="grid">
       <div class="category" onclick="selectCategory(this,'English')">English 📘</div>
       <div class="category" onclick="selectCategory(this,'Quant')">Quant 📐</div>
@@ -23,7 +35,6 @@
       <div class="category" onclick="selectCategory(this,'Web Dev')">Computer Science 💻</div>
     </div>
 
-    <!-- Difficulty -->
     <div class="pills">
       <div class="pill easy" onclick="selectDifficulty(this,'easy')">Easy</div>
       <div class="pill medium" onclick="selectDifficulty(this,'medium')">Medium</div>
