@@ -1,73 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Quiz</title>
+  <title>Quiz Challenge</title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Full Screen Mode Styles */
+    .fullscreen-mode {
+      position: fixed !important; top: 0 !important; left: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      background: #020617 !important; z-index: 999999 !important;
+      border-radius: 0 !important; padding: 40px !important;
+      display: flex !important; flex-direction: column !important;
+      align-items: center !important; justify-content: flex-start !important;
+      overflow-y: auto !important;
+    }
+    .fullscreen-mode::-webkit-scrollbar { display: none; }
+    
+    /* Ensure content stays centered and readable */
+    .fullscreen-mode .quiz-content-wrapper {
+        width: 100%; max-width: 800px;
+    }
+  </style>
 </head>
 <body>
 
 <div class="app">
-  <div class="card">
 
-    <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; color:var(--text-secondary); font-weight:600; font-size: 0.95rem;">
-      <span id="progress-text">Question 1 / 10</span>
-      <span id="timer" style="color:var(--accent);">Time: 00:00</span>
+  <div class="card" id="instruction-card">
+    <h1 class="title" style="font-size: 2.5rem; margin-bottom: 10px;">Ready? 🏁</h1>
+    <p class="subtitle" style="margin-bottom: 30px;">Read the instructions before you begin.</p>
+    
+    <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 25px; border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05);">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <div>
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Topic</span>
+          <div id="topic-display" style="font-weight: 700; font-size: 1.2rem; color: white;">Loading...</div>
+        </div>
+        <div style="text-align: right;">
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Difficulty</span>
+          <div id="difficulty-display" style="font-weight: 700; font-size: 1.2rem; color: white; text-transform: capitalize;">...</div>
+        </div>
+      </div>
+      <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 20px;">
+      <h3 style="color: var(--accent); margin-bottom: 15px;">📋 Instructions</h3>
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px; color: var(--text-primary);">
+        <li>⏱️ <strong>Time Limit:</strong> <span id="time-limit-display">...</span></li>
+        <li>🧠 <strong>Focus:</strong> Full screen mode enabled.</li>
+        <li>💡 <strong>Learning:</strong> Check answers to see explanations.</li>
+        <li>🏆 <strong>Passing Score:</strong> 70% accuracy required.</li>
+      </ul>
     </div>
 
-    <div class="progress-track" style="margin-top:0; margin-bottom: 30px;">
-      <div class="progress-fill" id="progress-bar"></div>
+    <button id="start-btn" class="btn btn-primary" onclick="startQuiz()" disabled style="opacity: 0.6; cursor: wait; width: 100%;">
+      Connecting to Database...
+    </button>
+  </div>
+
+
+  <div class="card" id="quiz-card" style="display: none;">
+    
+    <div class="quiz-content-wrapper">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; color:var(--text-secondary); font-weight:600; font-size: 0.95rem;">
+        <span id="progress-text">Question 1 / 10</span>
+        <span id="timer" style="color:var(--accent);">Time: 00:00</span>
+      </div>
+
+      <div class="progress-track" style="margin-top:0; margin-bottom: 30px;">
+        <div class="progress-fill" id="progress-bar"></div>
+      </div>
+
+      <h2 id="question" style="margin-top:0; font-size: 1.8rem; margin-bottom: 25px;">Loading...</h2>
+      
+      <div id="options"></div>
+
+      <div id="feedback-area" class="feedback-box" style="display: none;">
+        <span class="feedback-title">Explanation</span>
+        <p id="explanation-text" class="feedback-text">...</p>
+      </div>
+
+      <button id="action-btn" class="btn btn-primary" style="width: 100%; margin-top: 30px;" disabled>
+        Check Answer
+      </button>
     </div>
-
-    <h2 id="question" style="margin-top:0;">Loading Question...</h2>
-
-    <div id="options"></div>
 
   </div>
+
 </div>
 
 <script type="module">
   import { loadQuestions } from "./js/dataLoader.js";
   import { buildQuiz } from "./js/questionEngine.js";
-  import { initQuiz } from "./js/quizController.js";
+  import { initQuiz, handleMainButtonClick } from "./js/quizController.js";
 
-  // Error Handler
-  window.onerror = function(msg, source, line) {
-    document.body.innerHTML = `
-      <div style="color:red; background:#111; padding:20px; text-align:center;">
-        <h2>⚠️ Error</h2>
-        <p>${msg}</p>
-        <p>File: ${source} : ${line}</p>
-        <button class="btn" onclick="location.href='setup.html'">Go Back</button>
-      </div>`;
-  };
+  const instructionCard = document.getElementById("instruction-card");
+  const quizCard = document.getElementById("quiz-card");
+  const startBtn = document.getElementById("start-btn");
+  const actionBtn = document.getElementById("action-btn");
 
-  async function startApp() {
+  // Connect the Main Button to the Controller
+  actionBtn.addEventListener("click", handleMainButtonClick);
+
+  const TIME_LIMITS = { "easy": "10 Minutes", "medium": "15 Minutes", "hard": "20 Minutes" };
+
+  async function prepareGame() {
     try {
       const configRaw = localStorage.getItem("quizConfig");
-      if (!configRaw) {
-        window.location.href = "setup.html";
-        return;
-      }
+      if (!configRaw) { window.location.href = "setup.html"; return; }
       const config = JSON.parse(configRaw);
 
-      document.getElementById("question").textContent = "Connecting to Database...";
+      document.getElementById("topic-display").textContent = config.category;
+      document.getElementById("difficulty-display").textContent = config.difficulty;
+      document.getElementById("time-limit-display").textContent = TIME_LIMITS[config.difficulty] || "15 Minutes";
+
       await loadQuestions(config);
-
       buildQuiz(config);
-      initQuiz();
 
+      startBtn.textContent = "Start Challenge 🚀";
+      startBtn.disabled = false;
+      startBtn.style.opacity = "1";
+      startBtn.style.cursor = "pointer";
     } catch (err) {
       console.error(err);
-      document.querySelector(".card").innerHTML = `
-        <h2 style="color:var(--hard)">Unable to Start</h2>
-        <p>${err.message}</p>
-        <br>
-        <button class="btn btn-primary" onclick="location.href='setup.html'">Try Again</button>
-      `;
+      startBtn.textContent = "Error Loading Data";
+      startBtn.style.background = "var(--hard)";
     }
   }
 
-  startApp();
+  window.startQuiz = function() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) { elem.requestFullscreen().catch(err => console.log(err)); }
+
+    instructionCard.style.display = "none";
+    quizCard.style.display = "flex";
+    quizCard.classList.add("fullscreen-mode");
+
+    history.pushState(null, document.title, location.href);
+    window.addEventListener('popstate', () => history.pushState(null, document.title, location.href));
+
+    initQuiz();
+  }
+
+  prepareGame();
 </script>
 
 </body>
