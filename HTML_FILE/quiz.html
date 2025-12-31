@@ -9,14 +9,16 @@
 <div class="app">
   <div class="card">
 
-    <div class="progress-track">
-      <div class="progress-fill" id="progress"></div>
+    <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; color:var(--text-secondary); font-weight:600; font-size: 0.95rem;">
+      <span id="progress-text">Question 1 / 10</span>
+      <span id="timer" style="color:var(--accent);">Time: 00:00</span>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-       <h2 id="question" style="margin:0;">Loading Question...</h2>
-       <div id="timer" style="font-weight:bold; color:var(--accent); font-size:1.2rem;"></div>
+    <div class="progress-track" style="margin-top:0; margin-bottom: 30px;">
+      <div class="progress-fill" id="progress-bar"></div>
     </div>
+
+    <h2 id="question" style="margin-top:0;">Loading Question...</h2>
 
     <div id="options"></div>
 
@@ -28,7 +30,7 @@
   import { buildQuiz } from "./js/questionEngine.js";
   import { initQuiz } from "./js/quizController.js";
 
-  // Error Handler: Shows errors on screen if something crashes
+  // Error Handler
   window.onerror = function(msg, source, line) {
     document.body.innerHTML = `
       <div style="color:red; background:#111; padding:20px; text-align:center;">
@@ -41,28 +43,21 @@
 
   async function startApp() {
     try {
-      // 1. Get Settings
       const configRaw = localStorage.getItem("quizConfig");
       if (!configRaw) {
-        alert("No settings found. Redirecting...");
         window.location.href = "setup.html";
         return;
       }
       const config = JSON.parse(configRaw);
 
-      // 2. Fetch Data (API Connection)
       document.getElementById("question").textContent = "Connecting to Database...";
       await loadQuestions(config);
 
-      // 3. Prepare Game
       buildQuiz(config);
-
-      // 4. Start
       initQuiz();
 
     } catch (err) {
       console.error(err);
-      // Show friendly error message
       document.querySelector(".card").innerHTML = `
         <h2 style="color:var(--hard)">Unable to Start</h2>
         <p>${err.message}</p>
@@ -72,7 +67,6 @@
     }
   }
 
-  // Run the app
   startApp();
 </script>
 
