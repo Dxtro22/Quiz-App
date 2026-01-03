@@ -1,134 +1,164 @@
 import { QuizState } from "./state.js";
 
 // ==========================================
-// 1. CONFIGURATION
+// 🟢 CONFIGURATION
 // ==========================================
-const GEMINI_API_KEY = "AIzaSyBrFtz2OWIPfgv1Qk9pHL-hlvK7KUR2Du4"; 
+const GEMINI_API_KEY = "AIzaSyA5OVja-s5a4tHoJK5P_sVJVv40QXjfbpw"; 
+
+// 🟢 EXACT NAMES FROM YOUR SCREENSHOT LIST
+// We use "gemini-flash-latest" because your account explicitly lists it.
+const MODEL_CANDIDATES = [
+  "gemini-flash-latest", 
+  "gemini-pro",
+  "gemini-pro-latest"
+];
 
 // ==========================================
-// 2. EXTENDED BACKUP DATA (Covers ALL Topics)
-// ==========================================
-const BACKUP_DATA = {
-  // --- CODING ---
-  "HTML": [
-    { question: "What does HTML stand for?", options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup Language"], answer: 0, explanation: "HTML is the standard markup language for Web pages." },
-    { question: "Which tag is used for the largest heading?", options: ["<h6>", "<h1>", "<heading>", "<head>"], answer: 1, explanation: "<h1> defines the most important heading." },
-    { question: "Which HTML element is used to define the footer?", options: ["<footer>", "<section>", "<bottom>", "<end>"], answer: 0, explanation: "The <footer> tag defines a footer for a document or section." }
-  ],
-  "CSS": [
-    { question: "What does CSS stand for?", options: ["Cascading Style Sheets", "Creative Style Sheets", "Computer Style Sheets"], answer: 0, explanation: "CSS describes how HTML elements are to be displayed." },
-    { question: "Which property is used to change the background color?", options: ["background-color", "color", "bgcolor"], answer: 0, explanation: "The background-color property sets the background color." }
-  ],
-  "JavaScript": [
-    { question: "Inside which HTML element do we put the JavaScript?", options: ["<script>", "<js>", "<javascript>", "<scripting>"], answer: 0, explanation: "The <script> tag is used to define a client-side script." },
-    { question: "How do you write 'Hello World' in an alert box?", options: ["alert('Hello World');", "msg('Hello World');", "msgBox('Hello World');"], answer: 0, explanation: "alert() is the built-in function to show a popup." }
-  ],
-  
-  // --- GENERAL TOPICS (NEW!) ---
-  "GK": [
-    { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], answer: 1, explanation: "Mars appears red due to iron oxide." },
-    { question: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], answer: 2, explanation: "Paris is the capital of France." },
-    { question: "Who painted the Mona Lisa?", options: ["Van Gogh", "Picasso", "Da Vinci", "Monet"], answer: 2, explanation: "Painted by Leonardo da Vinci." }
-  ],
-  "English": [
-    { question: "Choose the synonym of 'Happy'.", options: ["Sad", "Joyful", "Angry", "Bored"], answer: 1, explanation: "Joyful means feeling great pleasure." },
-    { question: "Which word is a noun?", options: ["Run", "Quickly", "Cat", "Beautiful"], answer: 2, explanation: "A Cat is a living creature (noun)." },
-    { question: "Find the antonym of 'Cold'.", options: ["Freezing", "Hot", "Icy", "Cool"], answer: 1, explanation: "Hot is the opposite of Cold." }
-  ],
-  "Quant": [
-    { question: "What is 5 + 7?", options: ["10", "11", "12", "13"], answer: 2, explanation: "5 plus 7 equals 12." },
-    { question: "What is the square root of 64?", options: ["6", "7", "8", "9"], answer: 2, explanation: "8 * 8 = 64." },
-    { question: "Solve: 10 - 2 * 3", options: ["24", "4", "16", "6"], answer: 1, explanation: "Multiplication first: 2*3=6. Then 10-6=4." }
-  ],
-  "Web Dev": [
-    { question: "What does HTTP stand for?", options: ["HyperText Transfer Protocol", "HyperText Test Protocol", "HyperText Transfer Package"], answer: 0, explanation: "HTTP is the foundation of data communication for the WWW." },
-    { question: "Which is NOT a programming language?", options: ["Python", "HTML", "Java", "C++"], answer: 1, explanation: "HTML is a markup language, not a programming language." }
-  ]
-};
-
-// ==========================================
-// 3. MAIN LOADER
+// 1. MAIN LOADER
 // ==========================================
 export async function loadQuestions(config) {
   const category = config.category;
   const difficulty = config.difficulty;
+  
+  console.log(`🚀 Starting Engine for: ${category} (${difficulty})...`);
 
-  console.log(`fetching ${difficulty} questions for: ${category}`);
-
-  // 1. Try Gemini API (Using 'gemini-pro' for better stability)
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
-
-  const prompt = `
-    Create a JSON quiz with 10 multiple-choice questions about "${category}" (${difficulty} level).
-    Output STRICT JSON Array only. No Markdown.
-    Format: [{"question":"...","options":["A","B","C","D"],"answer":0,"explanation":"..."}]
-    (Answer is the integer index 0-3 of the correct option).
-  `;
-
+  // --- PHASE 1: TRY GOOGLE GEMINI ---
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-
-    if (!response.ok) throw new Error(`API Error ${response.status}`);
-
-    const data = await response.json();
-    let text = data.candidates[0].content.parts[0].text;
-    
-    // Clean data
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    
-    // Safety: ensure brackets exist
-    const firstBracket = text.indexOf("[");
-    const lastBracket = text.lastIndexOf("]");
-    if (firstBracket !== -1 && lastBracket !== -1) {
-      text = text.substring(firstBracket, lastBracket + 1);
-    }
-
-    const questions = JSON.parse(text);
-
-    // Save AI Questions
-    QuizState.allQuestions = questions.map((q, i) => ({
-      id: i,
-      category, difficulty,
-      question: q.question,
-      options: q.options,
-      answer: q.answer,
-      explanation: q.explanation
-    }));
-    
-    console.log("SUCCESS: Loaded from Gemini AI");
-
+    const aiQuestions = await fetchGeminiQuestions(category, difficulty);
+    saveToState(aiQuestions, category, difficulty);
+    console.log("✅ SUCCESS: Loaded fresh questions from Gemini AI");
+    return;
   } catch (err) {
-    console.warn("AI Failed. Switching to Backup Data.", err);
-    loadBackupData(category, difficulty);
+    console.warn("⚠️ AI Failed (All Models). Switching to Local Backup.");
+    // We intentionally removed the annoying popup alert. 
+    // It will just silently switch to backup now so you can play.
   }
+
+  // --- PHASE 2: LOCAL BACKUP ---
+  console.log("📂 Loading from Local Database...");
+  loadLocalQuestions(category, difficulty);
 }
 
-// 4. FALLBACK FUNCTION
-function loadBackupData(category, difficulty) {
-  // Try to find the specific category
-  let raw = BACKUP_DATA[category];
+// ==========================================
+// 🧠 ENGINE A: GEMINI AI (Smart Fetch)
+// ==========================================
+async function fetchGeminiQuestions(category, difficulty) {
+  // 1. Define specific prompts
+  let topicPrompt = category;
+  if (category === "HTML") topicPrompt = "HTML5 tags, attributes, and semantic structure";
+  if (category === "CSS") topicPrompt = "CSS3 styling, flexbox, grid, and selectors";
+  if (category === "JS") topicPrompt = "JavaScript ES6 syntax, functions, and logic";
+  if (category === "English") topicPrompt = "English grammar, vocabulary, synonyms, and antonyms";
+  if (category === "Quant") topicPrompt = "Mathematical aptitude, logical reasoning, and basic algebra";
   
-  // If not found, log it and default to HTML (This shouldn't happen now!)
-  if (!raw) {
-    console.error(`Backup data missing for ${category}. Defaulting to HTML.`);
-    raw = BACKUP_DATA["HTML"];
+  const prompt = `
+    Create a JSON quiz with 10 multiple-choice questions about "${topicPrompt}" (${difficulty} level).
+    Output STRICT JSON Array only. No Markdown. No code blocks.
+    Format: [{"question":"...","options":["A","B","C","D"],"answer":0,"explanation":"..."}]
+    (Answer must be the integer index 0-3 of the correct option).
+  `;
+
+  // 2. Loop through the valid models
+  for (const model of MODEL_CANDIDATES) {
+    try {
+      console.log(`🔄 Attempting connection to: ${model}...`);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+
+      if (!response.ok) throw new Error(response.statusText);
+
+      const data = await response.json();
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Empty Response");
+
+      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+      const start = text.indexOf("[");
+      const end = text.lastIndexOf("]");
+      
+      if (start === -1 || end === -1) throw new Error("Invalid JSON format");
+      
+      console.log(`✅ CONNECTED with ${model}`);
+      return JSON.parse(text.substring(start, end + 1));
+
+    } catch (e) {
+      console.warn(`❌ Model ${model} failed, trying next...`);
+    }
   }
+  throw new Error("All models failed");
+}
 
-  console.log(`Using Backup Data for ${category}`);
+// ==========================================
+// 📂 ENGINE B: LOCAL DATABASE (Specific Questions)
+// ==========================================
+const LOCAL_DB = {
+  "HTML": [
+    { q: "What does HTML stand for?", o: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks and Text Markup Language", "Hyper Tool Multi Language"], a: 0, e: "HTML is the standard markup language for documents designed to be displayed in a web browser." },
+    { q: "Which tag is used for the largest heading?", o: ["<head>", "<h6>", "<h1>", "<heading>"], a: 2, e: "<h1> defines the most important heading." },
+    { q: "Which HTML element defines the title of a document?", o: ["<meta>", "<head>", "<title>", "<header>"], a: 2, e: "The <title> tag specifies the title shown in the browser tab." },
+    { q: "Which character is used to indicate an end tag?", o: ["/", "*", "^", "<"], a: 0, e: "End tags always start with a slash, e.g., </p>." },
+    { q: "Which element is used to display an image?", o: ["<image>", "<img>", "<pic>", "<src>"], a: 1, e: "The <img> tag is used to embed an image." }
+  ],
+  "CSS": [
+    { q: "What does CSS stand for?", o: ["Cascading Style Sheets", "Creative Style System", "Computer Style Sheets", "Colorful Style Sheets"], a: 0, e: "CSS describes how HTML elements are to be displayed." },
+    { q: "Which property controls text color?", o: ["font-color", "text-style", "text-color", "color"], a: 3, e: "The 'color' property sets the color of the text." },
+    { q: "How do you make text bold?", o: ["font-weight: bold", "style: bold", "font: bold", "text-align: bold"], a: 0, e: "font-weight controls the thickness of the text." }
+  ],
+  "JS": [
+    { q: "Inside which HTML element do we put the JavaScript?", o: ["<javascript>", "<js>", "<script>", "<scripting>"], a: 2, e: "The <script> tag is used to embed JS." },
+    { q: "How do you write 'Hello World' in an alert box?", o: ["msg('Hello World')", "alert('Hello World')", "msgBox('Hello World')", "alertBox('Hello World')"], a: 1, e: "alert() is the built-in function." },
+    { q: "Which operator is used to assign a value to a variable?", o: ["*", "-", "=", "x"], a: 2, e: "The = operator assigns values." }
+  ],
+  "English": [
+    { q: "Identify the noun: 'The cat slept.'", o: ["The", "slept", "cat", "quickly"], a: 2, e: "A noun is a person, place, or thing." },
+    { q: "Which word is an antonym for 'Happy'?", o: ["Joyful", "Sad", "Bright", "Content"], a: 1, e: "Antonyms are words with opposite meanings." },
+    { q: "Choose the correct spelling.", o: ["Recieve", "Receive", "Receeve", "Riceive"], a: 1, e: "'I before E except after C'." }
+  ],
+  "Quant": [
+    { q: "What is 15% of 200?", o: ["20", "25", "30", "35"], a: 2, e: "10% is 20, 5% is 10. Total 30." },
+    { q: "Solve: 2 + 2 * 3", o: ["12", "8", "6", "10"], a: 1, e: "BODMAS: Multiply first (2*3=6), then add 2 (6+2=8)." },
+    { q: "What is the square root of 144?", o: ["10", "11", "12", "13"], a: 2, e: "12 * 12 = 144." }
+  ],
+  "GK": [
+    { q: "What is the capital of France?", o: ["Berlin", "Madrid", "Paris", "Rome"], a: 2, e: "Paris is the capital." },
+    { q: "Who wrote 'Romeo and Juliet'?", o: ["Dickens", "Hemingway", "Shakespeare", "Austen"], a: 2, e: "William Shakespeare wrote it." },
+    { q: "What is the chemical symbol for Gold?", o: ["Au", "Ag", "Fe", "Go"], a: 0, e: "Au stands for Aurum." }
+  ]
+};
 
-  // Shuffle and format
-  const shuffled = [...raw].sort(() => Math.random() - 0.5);
+function loadLocalQuestions(category, difficulty) {
+  let key = "GK";
+  const c = category.toLowerCase();
+  if (c.includes("html")) key = "HTML";
+  else if (c.includes("css")) key = "CSS";
+  else if (c.includes("js") || c.includes("java") || c.includes("code")) key = "JS";
+  else if (c.includes("english")) key = "English";
+  else if (c.includes("quant") || c.includes("math")) key = "Quant";
+
+  const questions = LOCAL_DB[key] || LOCAL_DB["GK"];
+  const shuffled = questions.sort(() => 0.5 - Math.random()); // Shuffle so it feels fresh
 
   QuizState.allQuestions = shuffled.map((q, i) => ({
+    id: i,
+    category, difficulty,
+    question: q.q,
+    options: q.o,
+    answer: q.a,
+    explanation: q.e
+  }));
+}
+
+function saveToState(questions, category, difficulty) {
+  QuizState.allQuestions = questions.map((q, i) => ({
     id: i,
     category, difficulty,
     question: q.question,
     options: q.options,
     answer: q.answer,
-    explanation: q.explanation || "Standard Backup Explanation"
+    explanation: q.explanation || "Correct Answer"
   }));
 }
